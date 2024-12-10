@@ -4,6 +4,7 @@ import torch
 import numpy as np
 import insightface
 from tqdm import tqdm
+from sklearn.preprocessing import LabelEncoder
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -13,6 +14,13 @@ y_train = np.load("Vidface_three_dimension/y_train.npy")  # torch.Size([3120])
 
 X_test = np.load("Vidface_three_dimension/X_test.npy")  # torch.Size([3120, 150, 150,3])
 y_test = np.load("Vidface_three_dimension/y_test.npy")  # torch.Size([3120])
+
+# 使用 LabelEncoder 对标签进行编码
+label_encoder = LabelEncoder()
+
+# 将标签从字符串类型转换为整数类型
+y_train = label_encoder.fit_transform(y_train)
+y_test = label_encoder.transform(y_test)
 
 # 转到设备cuda上
 X_train = torch.tensor(X)
@@ -36,7 +44,8 @@ model.prepare(ctx_id=1)  # ctx_id=0 表示使用 CPU，1 表示使用 GPU
 features = []
 y = []
 
-X = X_train
+# X = X_train
+X = X_test
 
 X = X.to(device)
 
@@ -56,6 +65,7 @@ for i in tqdm(range(X.shape[0]), desc="提取特征", ncols=100):
         feature = faces[0].embedding
         features.append(feature)
         y.append(y_test[i])
+        # y.append(y_train[i])
     else:
         # 如果没有检测到人脸，填充一个零向量
         print(f"第{i}张图像未检测到人脸")
@@ -67,5 +77,8 @@ print(f"检测到人脸共有 {X.shape[0] - img_num} / {X.shape[0]}")
 # 将特征转为 PyTorch 张量并保存
 features = torch.tensor(features)
 y = torch.tensor(y)
-# torch.save(features, "Vidface_three_dimension/arcface_F_test.pth")
-# torch.save(y, "Vidface_three_dimension/arcface_y_test.pth")
+torch.save(features, "Vidface_three_dimension/arcface_F_test.pth")
+torch.save(y, "Vidface_three_dimension/arcface_y_test.pth")
+
+# torch.save(features, "Vidface_three_dimension/arcface_F_train.pth")
+# torch.save(y, "Vidface_three_dimension/arcface_y_train.pth")

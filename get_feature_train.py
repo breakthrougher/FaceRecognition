@@ -110,6 +110,10 @@ y_train = np.array(train_labels)
 
 print(f"Detected Train faces num are: {X_train.shape[0]}/{train_num}")
 
+# 保存文件方便后续调用
+if not os.path.exists("Vidface_one_dimension"):
+  os.makedirs("Vidface_one_dimension")
+
 # 保存到文件
-np.save("data_cache/X_train.npy", X_train)
-np.save("data_cache/y_train.npy", y_train)
+np.save("Vidface_one_dimension/X_train.npy", X_train)
+np.save("Vidface_one_dimension/y_train.npy", y_train)
